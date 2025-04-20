@@ -14,6 +14,7 @@ public class PlayerScript : MonoBehaviour
     private Vector2 gravityVector = new Vector2(0, -9.8f);
     private float gravityChangeTimer = 0;
     private bool movementStatus = true;
+    private bool isUnderWater;
 
     private void Start()
     {
@@ -23,6 +24,8 @@ public class PlayerScript : MonoBehaviour
     private void Update()
     {
         GravityController();
+        
+        
     }
     private void FixedUpdate()
     {
@@ -58,8 +61,8 @@ public class PlayerScript : MonoBehaviour
     }
     private void CustomGravity()
     {
-        // here it applies force 
-        rb.AddForce(gravityVector); // we can change this gravity vector by using UpdateGravity Function
+        // applies CustomGravity  
+        rb.AddForce(gravityVector); 
         
         // Terminal Velocity
         rb.linearVelocity = new Vector2(Mathf.Clamp(rb.linearVelocity.x,-terminalVelocity,terminalVelocity),
@@ -76,5 +79,27 @@ public class PlayerScript : MonoBehaviour
             }
         }
     }
+    private void WaterMods(bool apply)
+    {
+        
+        rb.linearDamping = apply ? 2.6f : 1;
+    }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        rb.AddForce(rb.linearVelocity.magnitude * .8f * -rb.linearVelocity.normalized, ForceMode2D.Impulse);
+        if (collision.gameObject.CompareTag("water"))
+        {
+            isUnderWater = true;
+            WaterMods(true);
+        }
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("water"))
+        {
+            isUnderWater = false;
+            WaterMods(false);
+        }
+    }
 }
